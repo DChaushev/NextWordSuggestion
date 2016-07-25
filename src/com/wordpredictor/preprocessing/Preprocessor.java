@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,30 +33,75 @@ public class Preprocessor {
     }
 
     public static void createNgrams(File file, int ngrams) {
+        List<Map<String, Integer>> ngramsList = initNgramsList(ngrams);
+
         try (Scanner scanner = new Scanner(new BufferedReader(new FileReader(file)))) {
             String[] wordsHolder = new String[ngrams];
             int wordIndex = 0;
-            
+
             while (scanner.hasNext()) {
                 String word = scanner.next();
-                wordsHolder[wordIndex % ngrams] = word;
-                
-                System.out.println(wordIndex);
+                wordsHolder[wordIndex] = word;
+
                 for (int i = 0; i < ngrams; i++) {
-                    System.out.println(Math.abs((wordIndex - i) % ngrams) + ": " + wordsHolder[Math.abs((wordIndex - i) % ngrams)]);
+                    addNgram(ngramsList, wordsHolder, wordIndex, i);
                 }
-                System.out.println();
-                
+
+//                System.out.println(wordIndex);
+//                for (int i = 0; i < ngrams; i++) {
+//                    System.out.println(mod(wordIndex - i, ngrams) + ": " + wordsHolder[mod(wordIndex - i, ngrams)]);
+//                }
+//                System.out.println();
                 wordIndex++;
-                if(wordIndex == ngrams) wordIndex = 0;
+                if (wordIndex == ngrams) {
+                    wordIndex = 0;
+                }
             }
+            
+            print(ngramsList);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Preprocessor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
+    private static int mod(int n, int m) {
+        return (((n % m) + m) % m);
+    }
+
+    private static List<Map<String, Integer>> initNgramsList(int ngrams) {
+        List<Map<String, Integer>> ngramsList = new ArrayList<>();
+        for (int i = 0; i < ngrams; i++) {
+            ngramsList.add(new HashMap<>());
+        }
+        return ngramsList;
+    }
+
     public static void main(String[] args) {
         createNgrams("smallerText.txt");
+    }
+
+    private static void addNgram(List<Map<String, Integer>> ngramsList, String[] wordsHolder, int wordIndex, int i) {
+        String currentWord = "";
+        for (int j = 0; j < wordsHolder.length; j++) {
+            currentWord = wordsHolder[mod(wordIndex - j, wordsHolder.length)] + " " + currentWord;
+            addNgram(ngramsList.get(i), currentWord.trim());
+        }
+    }
+
+    private static void addNgram(Map<String, Integer> ngramMap, String currentWord) {
+        if (ngramMap.containsKey(currentWord)) {
+            ngramMap.put(currentWord, ngramMap.get(currentWord) + 1);
+        } else {
+            ngramMap.put(currentWord, 1);
+        }
+    }
+
+    private static void print(List<Map<String, Integer>> ngramsList) {
+        for (Map<String, Integer> map : ngramsList) {
+            for (String key : map.keySet()) {
+                System.out.println(key + ": " + map.get(key));
+            }
+        }
     }
 
 }
