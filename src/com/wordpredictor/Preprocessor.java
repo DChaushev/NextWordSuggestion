@@ -104,7 +104,7 @@ class Preprocessor {
                 }
             }
 
-            print(ngramsList);
+//            print(ngramsList);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Preprocessor.class.getName()).log(Level.SEVERE, null, ex);
         }
