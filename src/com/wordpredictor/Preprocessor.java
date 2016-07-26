@@ -113,7 +113,7 @@ class Preprocessor {
     }
 
     private static int mod(int n, int m) {
-        return (((n % m) + m) % m);
+        return (n & (m - 1));
     }
 
     private static List<Map<String, WordsHolder>> initNgramsList(int ngrams) {
